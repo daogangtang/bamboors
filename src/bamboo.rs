@@ -19,6 +19,7 @@ pub enum Protocol {
 
 }
 
+
 // other handler entities should implement this
 pub trait BambooHandler: Send + Sync {
     
@@ -81,9 +82,7 @@ impl <H> Handler for Bamboo<H> where H: BambooHandler {
         let mut req = Request::new(request);
         let mut res = response;
         
-        self.handler.before(&mut req);
         self.handler.handle(&mut req, &mut res);
-        self.handler.after(&mut res);
 
         // and then, write response data back to client
         // TODO

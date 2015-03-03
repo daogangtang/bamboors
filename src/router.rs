@@ -6,7 +6,9 @@ use recognizer::Router as Recognizer;
 use recognizer::{Match, Params};
 
 pub struct Router {
-    router_builder:  Recognizer<Box<BambooHandler>>
+    router_builder:  Recognizer<Box<BambooHandler>>,
+    before_handle: Box<Fn(&mut Request)>,
+    after_handle: Box<Fn(&mut Response)>,
 }
 
 impl Router {
@@ -14,7 +16,17 @@ impl Router {
     // constructor
     pub fn new() -> Router {
         Router {
-            router_builder: Recognizer::new()
+            router_builder: Recognizer::new(),
+            before_handle: Box::new(|_: &mut Request|{}),
+            after_handle: Box::new(|_: &mut Response|{})
+        }
+    }
+    
+    pub fn new_with_middleware(before_handle: Box<Fn(&mut Request)>, after_handle: Box<Fn(&mut Response)>) -> Router {
+        Router {
+            router_builder: Recognizer::new(),
+            before_handle: before_handle,
+            after_handle: after_handle
         }
     }
 
@@ -47,7 +59,8 @@ impl Router {
         }
 
         // execute the truely function handler
-        matched.handler.call(req, res)
+        // corresponding to hyper
+        matched.handler.handle(req, res)
 
     }
 
@@ -58,15 +71,16 @@ impl BambooHandler for Router {
     
     fn handle(&self, req: &mut Request, res: &mut Respose) -> Result<bool> {
         // before from Middleware trait
-        self.before(req);
+        (self.before_handle)(req);
         
         // main execution
         let path = req.uri.path;
         self.execute(path, req, res);
 
         // after from Middleware trait
-        self.after(res);
+        (self.after_handle)(res);
 
     }
 
 }
+
