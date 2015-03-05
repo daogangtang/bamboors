@@ -3,3 +3,9 @@
 name = "bamboors"
 version = "0.0.1"
 authors = ["Daogang Tang <daogangtang@126.com>"]
+
+[dependencies]
+
+hyper = "*"
+url = "*"
+route-recognizer = "*"

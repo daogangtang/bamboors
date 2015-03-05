@@ -1,6 +1,7 @@
 
-
-
+use bamboo::{BambooHandler, BambooResult};
+use request::Request;
+use response::Response;
 
 use recognizer::Router as Recognizer;
 use recognizer::{Match, Params};
@@ -34,7 +35,7 @@ impl Router {
     fn add<H: BambooHandler> (&mut self, pattern: &str, handler: H)
         -> &mut Router {
         
-        self.router_builder.add(pattern, Box::new(handler) as Box<BambooHandler>)
+        self.router_builder.add(pattern, Box::new(handler) as Box<BambooHandler>);
         // return self to trailing style expression
         self
     }
@@ -45,7 +46,7 @@ impl Router {
     }
    
     // here, Request is Bamboo Request
-    fn execute(&self, path: &str, req: &mut Request, res: &mut Respose) -> Result<bool> {
+    fn execute(&self, path: &str, req: &mut Request, res: &mut Response) -> BambooResult<String> {
         let matched = match self.recognize(path) {
             Some(matched) => matched,
 
@@ -66,20 +67,33 @@ impl Router {
 
 }
 
+unsafe impl Send for Router {}
+unsafe impl Sync for Router {}
+
 // implement this, make Router become a acceptable handler
 impl BambooHandler for Router {
     
-    fn handle(&self, req: &mut Request, res: &mut Respose) -> Result<bool> {
+    fn handle(&self, req: &mut Request, res: &mut Response) -> BambooResult<String> {
         // before from Middleware trait
-        (self.before_handle)(req);
-        
-        // main execution
-        let path = req.uri.path;
-        self.execute(path, req, res);
-
-        // after from Middleware trait
-        (self.after_handle)(res);
-
+        let mut ret = (self.before_handle)(req);
+        match ret {
+            Ok(_) => {
+                // main execution
+                let path = req.uri.path;
+                ret = self.execute(path, req, res);
+                match ret {
+                    Ok(body) => {
+                        // after from Middleware trait
+                        (self.after_handle)(res);
+                        // once handler produce body, post middleware couldn't modify it?
+                        body
+    
+                    },
+                    Err(e) => Err(e)
+                }
+            },
+            Err(e) => Err(e)
+        }
     }
 
 }

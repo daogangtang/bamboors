@@ -1,7 +1,7 @@
 
 pub struct Uri {
-    path: &str,
-    query_string: &str,
+    path: &'static str,
+    query_string: &'static str,
 }
 
 impl Uri {
