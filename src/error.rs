@@ -10,7 +10,7 @@ pub struct BambooError {
 }
 
 impl BambooError {
-    pub fn new(desc: &'static str) {
+    pub fn new(desc: &'static str) -> BambooError {
         BambooError {
             desc: desc 
         }
@@ -28,7 +28,7 @@ impl StdError for BambooError {
 }
 
 impl fmt::Display for BambooError {
-    fn fmt(&self, f: *mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         fmt::Display::fmt(self.desc, f)
     }
 }

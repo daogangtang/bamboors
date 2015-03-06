@@ -2,6 +2,7 @@
 use std::net::{SocketAddr, IpAddr};
 use std::os;
 use std::path::Path;
+use std::io::{Write, Read};
 
 use hyper::server::{Handler, Server, Listening};
 use hyper::server::request::Request as HttpRequest;
@@ -18,9 +19,9 @@ pub enum Protocol {
     Http,
     Https {
         // Path to SSL certificate file
-        certificate: Box<Path>,
+        certificate: &'static str,
         // Path to SSL private key file
-        key: Box<Path>
+        key: &'static str
     }
 
 }
@@ -54,7 +55,7 @@ impl <H: BambooHandler> Bamboo<H> {
         self.listen_with(ip, port, os::num_cpus() * 5 / 4, Protocol::Http)
     }
 
-    pub fn https (self, ip: IpAddr, port: u16, certificate: Path, key: Path) -> HttpResult<Listening> {
+    pub fn https (self, ip: IpAddr, port: u16, certificate: &'static str, key: &'static str) -> HttpResult<Listening> {
         self.listen_with(ip, port, os::num_cpus() * 5 / 4, Protocol::Https {
             certificate: certificate, 
             key: key
@@ -66,7 +67,7 @@ impl <H: BambooHandler> Bamboo<H> {
             Protocol::Http 
                 => Server::http(self),
             Protocol::Https { ref certificate, ref key } 
-                => Server::https(self, certificate.clone(), key.clone())
+                => Server::https(self, Path::new(certificate.clone()), Path::new(key.clone()))
         };
         
         Ok(try!(server.listen_threads(ip, port, nthreads)))
@@ -81,7 +82,7 @@ impl<H> Handler for Bamboo<H> where H: BambooHandler {
     //*** framework entry ***
     fn handle(&self, request: HttpRequest, response: Response<Fresh>) {
         // here we need convert HyperRequest to BambooRequest
-        let mut req = Request::new(request);
+        let mut req = Request::new(request).unwrap();
         let mut res = response;
        
         // logic into
@@ -90,16 +91,16 @@ impl<H> Handler for Bamboo<H> where H: BambooHandler {
         // and then, write response data back to client
         match ret {
             Ok(ref ret) => {
-                res.write2client();
-                res.start();
+                let mut res = res.start().unwrap();
                 //res.write_all(ret);
                 // for test
-                res.write_all(b"hello bamboo.");
-                res.end();
+                res.write_all(b"hello bamboo.").unwrap();
+                res.end().unwrap();
                 return;
             },
             Err(e) => {
-                println!("[Error] Error: {:?}\nRequest: {:?}\n", e, req);
+                //println!("[Error] Error: {:?}\nRequest: {:?}\n", e, req);
+                println!("[Error] Error: {:?}\n", e);
             }
         }
 
@@ -124,7 +125,7 @@ impl<F> BambooHandler for F
 impl BambooHandler for Box<BambooHandler> {
     
     fn handle(&self, req: &mut Request, res: &mut Response) -> BambooResult<String> {
-        (**self).handle(req);
+        (**self).handle(req, res);
     }
 }
 

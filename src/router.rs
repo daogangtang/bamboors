@@ -1,5 +1,6 @@
 
 use bamboo::{BambooHandler, BambooResult};
+use error::BambooError;
 use request::Request;
 use response::Response;
 
@@ -8,8 +9,8 @@ use recognizer::{Match, Params};
 
 pub struct Router {
     router_builder:  Recognizer<Box<BambooHandler>>,
-    before_handle: Box<Fn(&mut Request)>,
-    after_handle: Box<Fn(&mut Response)>,
+    before_handle: Box<Fn(&mut Request) -> BambooResult<String>>,
+    after_handle: Box<Fn(&mut Response) -> BambooResult<String>>,
 }
 
 impl Router {
@@ -18,12 +19,12 @@ impl Router {
     pub fn new() -> Router {
         Router {
             router_builder: Recognizer::new(),
-            before_handle: Box::new(|_: &mut Request|{}),
-            after_handle: Box::new(|_: &mut Response|{})
+            before_handle: Box::new(|_: &mut Request|->BambooResult<String>{ Ok("".to_string())}),
+            after_handle: Box::new(|_: &mut Response|->BambooResult<String>{ Ok("".to_string())})
         }
     }
     
-    pub fn new_with_middleware(before_handle: Box<Fn(&mut Request)>, after_handle: Box<Fn(&mut Response)>) -> Router {
+    pub fn new_with_middleware(before_handle: Box<Fn(&mut Request)->BambooResult<String>>, after_handle: Box<Fn(&mut Response)->BambooResult<String>>) -> Router {
         Router {
             router_builder: Recognizer::new(),
             before_handle: before_handle,
@@ -41,7 +42,7 @@ impl Router {
     }
 
     // this method to recognize the path by previously added patterns
-    fn recognize(&self, path: &str) -> Option<Match<Box<BambooHandler>>> {
+    fn recognize<'a>(&'a self, path: &str) -> Option<Match<&'a Box<BambooHandler>>> {
         self.router_builder.recognize(path).ok()
     }
    
@@ -51,12 +52,12 @@ impl Router {
             Some(matched) => matched,
 
             // No match
-            None => return Err()
+            None => return Err(BambooError::new("none"))
         };
 
         // here, we need to extract matched.params and dump them into req.params
         for (k, v) in matched.params.map.iter() {
-            req.params.insert(k, v);
+            req.params.insert(*k, *v);
         }
 
         // execute the truely function handler
@@ -86,7 +87,7 @@ impl BambooHandler for Router {
                         // after from Middleware trait
                         (self.after_handle)(res);
                         // once handler produce body, post middleware couldn't modify it?
-                        body
+                        Ok(body)
     
                     },
                     Err(e) => Err(e)

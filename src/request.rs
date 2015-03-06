@@ -11,22 +11,24 @@ use hyper::header::Headers;
 
 use std::net::SocketAddr;
 use std::io::Result as IoResult;
+use std::io::{Read, Write};
 
 use std::collections::HashMap;
 use bamboo::BambooResult;
+use error::BambooError;
 use uri::Uri;
 use typemap::TypeMap;
 
 /// The body of an Iron request,
-pub struct Body<'a>(HttpReader<&'a mut (Reader + 'a)>);
+pub struct Body<'a>(HttpReader<&'a mut (Read + 'a)>);
 
 impl<'a> Body<'a> {
-    pub fn new(reader: HttpReader<&'a mut (Reader + 'a)>) -> Body<'a> {
+    pub fn new(reader: HttpReader<&'a mut (Read + 'a)>) -> Body<'a> {
         Body(reader)
     }   
 }
 
-impl<'a> Reader for Body<'a> {
+impl<'a> Read for Body<'a> {
     fn read(&mut self, buf: &mut [u8]) -> IoResult<usize> {
         self.0.read(buf)
     }   
@@ -87,7 +89,7 @@ impl<'a> Request<'a> {
                     params.insert(elem.0, elem.1);
                 }
             },
-            _ => return Err("unsupported request URI".to_string())
+            _ => return Err(BambooError::new("unsupported request URI"))
         };
 
         Ok(Request {
