@@ -33,7 +33,7 @@ impl Router {
     }
 
     // use this method to add url pattern
-    fn add<H: BambooHandler> (&mut self, pattern: &str, handler: H)
+    pub fn add<H: BambooHandler> (&mut self, pattern: &str, handler: H)
         -> &mut Router {
         
         self.router_builder.add(pattern, Box::new(handler) as Box<BambooHandler>);

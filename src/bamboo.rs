@@ -92,9 +92,9 @@ impl<H> Handler for Bamboo<H> where H: BambooHandler {
         match ret {
             Ok(ref ret) => {
                 let mut res = res.start().unwrap();
-                //res.write_all(ret);
+                res.write_all(ret.as_bytes());
                 // for test
-                res.write_all(b"hello bamboo.").unwrap();
+                //res.write_all(b"hello bamboo.").unwrap();
                 res.end().unwrap();
                 return;
             },

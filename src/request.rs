@@ -80,12 +80,14 @@ impl<'a> Request<'a> {
             _ => return Err(BambooError::new("Unsupported request URI"))
         };
 
-        let path: String = format!("/{}", url_obj.path().unwrap().connect("/"));
+        //let path: String = format!("/{}", url_obj.path().unwrap().connect("/"));
+        let path: String = "/".to_string();
         //let query_string: String = format!("{}", query_str_obj.to_string());
         //let query_string: String = "".to_string();
 //        let uri: Uri = Uri::new(path.as_slice(), "");
         let uri: Uri = Uri::new("", "");
-        let query_str_obj = url_obj.query_pairs().unwrap();
+        //let query_str_obj = url_obj.query_pairs().unwrap();
+        let query_str_obj = vec![("xxx".to_string(), "yyy".to_string())];
 
         //let tmp: &str = format!("{}", path).as_slice();
 
