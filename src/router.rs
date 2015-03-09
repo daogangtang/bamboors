@@ -57,7 +57,7 @@ impl Router {
 
         // here, we need to extract matched.params and dump them into req.params
         for (k, v) in matched.params.map.iter() {
-            req.params.insert(*k, *v);
+            req.params.insert(k.clone(), v.clone());
         }
 
         // execute the truely function handler
@@ -85,7 +85,7 @@ impl BambooHandler for Router {
                 match ret {
                     Ok(body) => {
                         // after from Middleware trait
-                        (self.after_handle)(res);
+                        (self.after_handle)(res).unwrap();
                         // once handler produce body, post middleware couldn't modify it?
                         Ok(body)
     

@@ -1,11 +1,11 @@
 
-pub struct Uri {
-    pub path: &'static str,
-    pub query_string: &'static str,
+pub struct Uri<'a> {
+    pub path: &'a str,
+    pub query_string: &'a str,
 }
 
-impl Uri {
-    pub fn new(path: &'static str, query_string: &'static str) -> Uri {
+impl<'a> Uri<'a> {
+    pub fn new(path: &'a str, query_string: &'a str) -> Uri<'a> {
         Uri {
             path: path,
             query_string: query_string

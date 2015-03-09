@@ -22,9 +22,9 @@ impl StdError for BambooError {
         self.desc
     }
 
-    fn cause(&self) -> Option<&StdError> {
-
-    }
+//    fn cause(&self) -> Option<&StdError> {
+//
+//    }
 }
 
 impl fmt::Display for BambooError {

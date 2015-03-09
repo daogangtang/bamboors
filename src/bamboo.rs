@@ -113,10 +113,10 @@ impl<H> Handler for Bamboo<H> where H: BambooHandler {
 // implement BambooHandler for function handler kind, so function can
 // call its self by:  handle_func.handle(req, res)
 impl<F> BambooHandler for F 
-    where F: Send + Sync + 'static + Fn(&mut Request, &mut Response) {
+    where F: Send + Sync + 'static + Fn(&mut Request, &mut Response)->BambooResult<String> {
     
     fn handle(&self, req: &mut Request, res: &mut Response) -> BambooResult<String> {
-       (*self)(req, res);
+       (*self)(req, res)
     }
 
 }
@@ -125,7 +125,7 @@ impl<F> BambooHandler for F
 impl BambooHandler for Box<BambooHandler> {
     
     fn handle(&self, req: &mut Request, res: &mut Response) -> BambooResult<String> {
-        (**self).handle(req, res);
+        (**self).handle(req, res)
     }
 }
 

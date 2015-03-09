@@ -1,3 +1,6 @@
+#![feature(unboxed_closures, core, os, io, net, path)]
+
+
 extern crate hyper;
 extern crate url;
 extern crate "route-recognizer" as recognizer;
