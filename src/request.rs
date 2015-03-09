@@ -67,47 +67,27 @@ impl<'a> Debug for Request<'a> {
 impl<'a> Request<'a> {
     pub fn new(request: HttpRequest<'a>) -> BambooResult<Request<'a>> {
         let (remote_addr, method, headers, orig_uri, version, body) = request.deconstruct();
-        //let path = match orig_uri {
-        let url_obj = match orig_uri {
+        let path = match orig_uri {
             AbsolutePath(ref _path) => {
-//                _path
-                let url_str = format!("http://localhost/{}", _path);
-                match Url::parse(url_str.as_slice()) {
-                    Ok(url) => url,
-                    Err(e) => return Err(BambooError::new("Couldn't parse requested URL: {}"))
-                }
+                _path
             },
             _ => return Err(BambooError::new("Unsupported request URI"))
         };
 
-        let path: String = format!("/{}", url_obj.path().unwrap().connect("/"));
-        //let query_string: String = format!("{}", query_str_obj.to_string());
-        //let query_string: String = "".to_string();
-//        let uri: Uri = Uri::new(path.as_slice(), "");
-        let uri: Uri = Uri::new("", "");
-        let query_str_obj = url_obj.query_pairs().unwrap();
+        let uri_vec: Vec<&str> = path.split('?').collect();
+        let uri: Uri;
+        if uri_vec.len() == 1 {
+            uri = Uri::new(uri_vec[0], "");
+        }
+        else {
+            uri = Uri::new(uri_vec[0], uri_vec[1]);
+        }
 
-        //let tmp: &str = format!("{}", path).as_slice();
-
-        //let deliter = path.find('?').unwrap();
-        //let uri_vec: Vec<&str> = path.split('?').collect();
-        //let uri_vec: Vec<&str> = path.split('?').collect();
-        //let uri_vec: Vec<&str> = vec!["/", ""];
-        //let uri_vec: Vec<&str> = vec![&path[..deliter], &path[(deliter+1)..]];
-        //if uri_vec.len() == 1 {
-        //    uri = Uri::new(uri_vec[0], "");
-        //}
-        //else {
-        //    uri = Uri::new(uri_vec[0], uri_vec[1]);
-            //let mut uri: Uri = Uri::new("/", "");
-        //}
-
-        //let query_vec = parse_query_string(uri.query_string.as_bytes());
+        let query_vec = parse_query_string(uri.query_string.as_bytes());
 
         let mut params = HashMap::new();
         // transform it to hashmap, store them in params
-        //for elem in query_vec  {
-        for elem in query_str_obj  {
+        for elem in query_vec  {
             params.insert(elem.0, elem.1);
         }
         Ok(Request {
@@ -121,21 +101,6 @@ impl<'a> Request<'a> {
             params: params,
             meta: TypeMap::new(),
         })
-/*
-        let mut uri: Uri = Uri::new("/", "");
-        let mut params = HashMap::new();
-        Ok(Request {
-            version: version,
-            method: method,
-            remote_addr: remote_addr,
-            headers: headers,
-            // path ...
-            uri: uri,
-            body: Body::new(body),
-            params: params,
-            meta: TypeMap::new(),
-        })
-*/
 
     }
 
