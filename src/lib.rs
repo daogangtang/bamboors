@@ -6,7 +6,7 @@ extern crate url;
 extern crate "route-recognizer" as recognizer;
 
 
-pub use bamboo::{Bamboo, BambooHandler, Protocol};
+pub use bamboo::{Bamboo, BambooHandler, Protocol, BambooResult};
 pub use error::BambooError;
 pub use request::Request;
 pub use response::Response;
@@ -19,6 +19,7 @@ pub mod prelude {
         BambooHandler,
         Protocol,
         BambooError,
+        BambooResult,
         Request,
         Response,
         TypeMap,

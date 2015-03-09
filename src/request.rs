@@ -74,16 +74,31 @@ impl<'a> Request<'a> {
             _ => return Err(BambooError::new("Unsupported request URI"))
         };
 
-        let uri_vec: Vec<&str> = path.split('?').collect();
-        let uri: Uri;
-        if uri_vec.len() == 1 {
-            uri = Uri::new(uri_vec[0], "");
-        }
-        else {
-            uri = Uri::new(uri_vec[0], uri_vec[1]);
-        }
+        //let path: String = format!("/{}", url_obj.path().unwrap().connect("/"));
+        let path: String = "/".to_string();
+        //let query_string: String = format!("{}", query_str_obj.to_string());
+        //let query_string: String = "".to_string();
+//        let uri: Uri = Uri::new(path.as_slice(), "");
+        let uri: Uri = Uri::new("", "");
+        //let query_str_obj = url_obj.query_pairs().unwrap();
+        let query_str_obj = vec![("xxx".to_string(), "yyy".to_string())];
 
-        let query_vec = parse_query_string(uri.query_string.as_bytes());
+        //let tmp: &str = format!("{}", path).as_slice();
+
+        //let deliter = path.find('?').unwrap();
+        //let uri_vec: Vec<&str> = path.split('?').collect();
+        //let uri_vec: Vec<&str> = path.split('?').collect();
+        //let uri_vec: Vec<&str> = vec!["/", ""];
+        //let uri_vec: Vec<&str> = vec![&path[..deliter], &path[(deliter+1)..]];
+        //if uri_vec.len() == 1 {
+        //    uri = Uri::new(uri_vec[0], "");
+        //}
+        //else {
+        //    uri = Uri::new(uri_vec[0], uri_vec[1]);
+            //let mut uri: Uri = Uri::new("/", "");
+        //}
+
+        //let query_vec = parse_query_string(uri.query_string.as_bytes());
 
         let mut params = HashMap::new();
         // transform it to hashmap, store them in params

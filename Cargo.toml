@@ -4,6 +4,10 @@ name = "bamboors"
 version = "0.0.1"
 authors = ["Daogang Tang <daogangtang@126.com>"]
 
+[lib]
+name = "bamboo"
+path = "src/lib.rs"
+
 [dependencies]
 
 hyper = "*"
